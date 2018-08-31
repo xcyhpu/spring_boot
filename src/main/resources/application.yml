@@ -1,0 +1,16 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017
+      database: test
+      repositories:
+        enabled: true
+#    elasticsearch:
+#      cluster-name: cluster_elasticsearch
+#      cluster-nodes: localhost:9300,localhost:9301,localhost:9302
+#      repositories:
+#        enabled: true
+  elasticsearch:
+    jest:
+      uris: http://localhost:9200,http://localhost:9201,http://localhost:9202
+      read-timeout: 3000
