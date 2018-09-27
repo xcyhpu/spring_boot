@@ -7,15 +7,15 @@ public class User {
 
     private Long id;
 
-    private String anme;
+    private String name;
 
     public User() {
         super();
     }
 
-    public User(Long id, String anme) {
+    public User(Long id, String name) {
         this.id = id;
-        this.anme = anme;
+        this.name = name;
     }
 
     public Long getId() {
@@ -26,13 +26,19 @@ public class User {
         this.id = id;
     }
 
-    public String getAnme() {
-        return anme;
+    public String getName() {
+        return name;
     }
 
-    public void setAnme(String anme) {
-        this.anme = anme;
+    public void setName(String name) {
+        this.name = name;
     }
 
-
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }

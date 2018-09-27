@@ -1,3 +1,4 @@
+
 spring:
   data:
     mongodb:
@@ -14,3 +15,23 @@ spring:
     jest:
       uris: http://localhost:9200,http://localhost:9201,http://localhost:9202
       read-timeout: 3000
+      connection-timeout: 3000
+
+rocketmq:
+  producer:
+    groupName: RocketMQ_Group
+    namesrvAddr: localhost:9876
+    instanceName: defaultInstance
+    ## 4M
+    maxMessageSize: 4194304
+    ## 10秒
+    sendMessageTimeout: 10000
+  consumer:
+    namesrvAddr: localhost:9876
+    groupName: RocketMQ_Group
+    topic: TEST
+    tag: TEST
+    consumeThreadMin: 20
+    consumeThreadMax: 64
+server:
+  port: 8081
