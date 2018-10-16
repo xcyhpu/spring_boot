@@ -10,8 +10,11 @@ import com.alibaba.rocketmq.common.message.Message;
 import com.alibaba.rocketmq.remoting.exception.RemotingException;
 import com.xcy.domain.UserMongo;
 import com.xcy.elastic.User;
+import com.xcy.mybatis.dao.GeneratorCardTaskInfoMoMapper;
+import com.xcy.mybatis.mo.GeneratorCardTaskInfoMo;
+import com.xcy.mybatis.mo.GeneratorCardTaskInfoMoExample;
+import com.xcy.rocketmq.MessageListener;
 import com.xcy.service.UserService;
-import io.searchbox.action.BulkableAction;
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestResult;
 import io.searchbox.core.Bulk;
@@ -20,10 +23,17 @@ import io.searchbox.core.Search;
 import io.searchbox.core.SearchResult;
 import io.searchbox.indices.CreateIndex;
 import io.searchbox.indices.DeleteIndex;
-import org.elasticsearch.action.bulk.BulkAction;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mybatis.generator.api.MyBatisGenerator;
+import org.mybatis.generator.config.Configuration;
+import org.mybatis.generator.config.xml.ConfigurationParser;
+import org.mybatis.generator.exception.InvalidConfigurationException;
+import org.mybatis.generator.exception.XMLParserException;
+import org.mybatis.generator.internal.DefaultShellCallback;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.domain.Example;
@@ -31,11 +41,18 @@ import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.annotation.Resource;
+import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
+@MapperScan("com.xcy.mybatis.dao")
 public class DemoApplicationTests {
 
 	@Autowired
@@ -208,18 +225,126 @@ public class DemoApplicationTests {
 		final Message message = new Message();
 
 		message.setTopic("TEST");
-		message.setTags("TEST");
+		message.setTags("TEST_2");
 		message.setKeys("xuchunyang");
-		message.setBody("xcy from springboot".getBytes());
+		message.setBody(("xcy from springboot："+new SimpleDateFormat("YYYY-MM-dd HH:mm:ss.SSS").format(new Date())).getBytes());
 
 		final SendResult result = producer.send(message);
 
 		System.out.println(result);
 
-		context.getBean(DefaultMQPushConsumer.class);
-
 		Thread.sleep(10000);
 
+	}
+
+	@Test
+	public void testRocketMQ2() throws InterruptedException, RemotingException,
+			MQClientException, MQBrokerException {
+
+
+		String topic = "TEST_HAHA_TOPIC2";
+		String tags = "TEST_HAHA_TAGS2";
+
+		DefaultMQProducer producer = context.getBean(DefaultMQProducer.class);
+
+		final Message message = new Message();
+
+		message.setTopic(topic);
+		message.setTags(tags);
+		message.setKeys("xuchunyang");
+		message.setBody(("xcy from springboot："+new SimpleDateFormat("YYYY-MM-dd HH:mm:ss.SSS").format(new Date())).getBytes());
+
+		final SendResult result = producer.send(message);
+
+		System.out.println(result);
+
+		/** 先send，保证topic和tag被创建，然后才能subscribe */
+
+		DefaultMQPushConsumer consumer = new DefaultMQPushConsumer(groupName);
+		consumer.setNamesrvAddr(namesrvAddr);
+		consumer.setConsumeThreadMin(consumeThreadMin);
+		consumer.setConsumeThreadMax(consumeThreadMax);
+		consumer.setMessageListener(messageListener);
+
+		try {
+			consumer.subscribe(topic, tags);
+			consumer.start();
+			System.out.println("Consumer start successfully!!!"
+					+ "  groupName : " + groupName
+					+ "  namesrvAddr : " + namesrvAddr
+					+ "  topic : " + topic
+					+ "  tags : " + tags);
+		} catch (MQClientException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	@Value("${rocketmq.consumer.groupName}")
+	private String groupName;
+
+	@Value("${rocketmq.consumer.namesrvAddr}")
+	private String namesrvAddr;
+
+	@Value("${rocketmq.consumer.consumeThreadMin}")
+	private int consumeThreadMin;
+
+	@Value("${rocketmq.consumer.consumeThreadMax}")
+	private int consumeThreadMax;
+
+	@Autowired
+	private MessageListener messageListener;
+
+	@Test
+	public void testMybatisGenerator() {
+
+		List<String> warnings = new ArrayList<>();
+		boolean overwrite = true;
+		//如果这里出现空指针，直接写绝对路径即可。
+		String genCfg = "/mbgConfiguration.xml";
+		File configFile = new File(this.getClass().getResource(genCfg).getFile());
+		ConfigurationParser cp = new ConfigurationParser(warnings);
+		Configuration config = null;
+		try {
+			config = cp.parseConfiguration(configFile);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (XMLParserException e) {
+			e.printStackTrace();
+		}
+		DefaultShellCallback callback = new DefaultShellCallback(overwrite);
+		MyBatisGenerator myBatisGenerator = null;
+		try {
+			myBatisGenerator = new MyBatisGenerator(config, callback, warnings);
+		} catch (InvalidConfigurationException e) {
+			e.printStackTrace();
+		}
+		try {
+			myBatisGenerator.generate(null);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+	}
+
+
+	@Resource
+	private GeneratorCardTaskInfoMoMapper generatorCardTaskInfoMoMapper;
+
+	@Test
+	public void testMybatisDao() {
+
+		GeneratorCardTaskInfoMoExample example = new GeneratorCardTaskInfoMoExample();
+
+		example.createCriteria().andDisplayIdEqualTo("AP1810150001");
+
+		List<GeneratorCardTaskInfoMo> list = generatorCardTaskInfoMoMapper.selectByExample(example);
+
+		System.out.println(JSON.toJSONString(list, true));
 
 	}
 

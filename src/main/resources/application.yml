@@ -1,3 +1,5 @@
+server:
+  port: 8081
 
 spring:
   data:
@@ -17,6 +19,25 @@ spring:
       read-timeout: 3000
       connection-timeout: 3000
 
+  datasource:
+    url: jdbc:mysql://172.16.10.40:3306/HTgenerator?characterEncoding=utf8
+    username: huitongjy
+    password: huitongjy123
+    driver-class-name: com.mysql.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+    maxActive: 20
+    initialSize: 1
+    maxWait: 60000
+    minIdle: 1
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 300000
+    validationQuery: SELECT 1 FROM DUAL
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+    maxOpenPreparedStatements: 20
+
 rocketmq:
   producer:
     groupName: RocketMQ_Group
@@ -30,8 +51,17 @@ rocketmq:
     namesrvAddr: localhost:9876
     groupName: RocketMQ_Group
     topic: TEST
-    tag: TEST
+    tag: TEST_2
     consumeThreadMin: 20
     consumeThreadMax: 64
-server:
-  port: 8081
+
+mybatis:
+  mapper-locations: classpath:mybatis/mapper/*Mapper.xml
+  type-aliases-package: com.xcy.mybatis.mo
+
+#pagehelper分页插件
+pagehelper:
+    helperDialect: mysql
+    reasonable: true
+    supportMethodsArguments: true
+    params: count=countSql

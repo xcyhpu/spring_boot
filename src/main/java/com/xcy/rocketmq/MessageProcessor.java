@@ -17,10 +17,14 @@ public class MessageProcessor implements IMessageProcessor {
     @Override
     public boolean handleMessage(MessageExt messageExt) {
 
-        log.info("Consume Message [ topic : "+ messageExt.getTopic() +
+        System.out.println("Consume Message [ topic : "+ messageExt.getTopic() +
                         " key :" + messageExt.getKeys() +
                         " tag: " + messageExt.getTags() +
                         " body: " + new String(messageExt.getBody())+" ] ");
+//        log.info("Consume Message [ topic : "+ messageExt.getTopic() +
+//                        " key :" + messageExt.getKeys() +
+//                        " tag: " + messageExt.getTags() +
+//                        " body: " + new String(messageExt.getBody())+" ] ");
 
 
         return true;

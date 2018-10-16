@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Bean;
 /**
  * Created by xuchunyang on 2018/9/6 11点00分
  */
-@SpringBootConfiguration
+//@SpringBootConfiguration
 public class ConsumerConfiguration {
 
     private static final Logger log = LoggerFactory.getLogger(ConsumerConfiguration.class);
@@ -38,7 +38,7 @@ public class ConsumerConfiguration {
 
 
     @Autowired
-    private IMessageProcessor messageProcessor;
+    private MessageListener messageListener;
 
 
     @Bean
@@ -62,10 +62,7 @@ public class ConsumerConfiguration {
         consumer.setNamesrvAddr(namesrvAddr);
         consumer.setConsumeThreadMin(consumeThreadMin);
         consumer.setConsumeThreadMax(consumeThreadMax);
-
-        MessageListener listener = new MessageListener();
-        listener.setMessageProcessor(messageProcessor);
-        consumer.setMessageListener(listener);
+        consumer.setMessageListener(messageListener);
 
         try {
             consumer.subscribe(topic, tag);
