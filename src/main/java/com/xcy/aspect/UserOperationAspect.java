@@ -30,10 +30,10 @@ public class UserOperationAspect {
         System.out.println("before");
 
         UserMongo user = new UserMongo();
-		user.setAddress("中南海");
-		user.setName("张三");
+        user.setAddress("中南海");
+        user.setName("张三");
 
-		final UserMongo insert = userDao.insert(user);
+        final UserMongo insert = userDao.insert(user);
 
         try {
             final Object[] args = pjp.getArgs();
